@@ -2,7 +2,9 @@
 
 > ####  More information please see: [open-webui/open-webui ](https://github.com/open-webui/open-webui)
 
-[Open WebUI (以前稱為 Ollama WebUI)](https://github.com/open-webui/open-webui/tree/main) 就是一個可以架在自己的機器上面的 WebUI，它支援多種 LLM runners，包誇 Ollama 和 OpenAI-compatible APIs
+[Open WebUI (以前稱為 Ollama WebUI)](https://github.com/open-webui/open-webui/tree/main) 就是一個可以架在自己的機器上面的 WebUI，它支援多種 LLM runners，包誇 Ollama 和 OpenAI-compatible APIs。
+
+<img src="./images/webui.png" width="80%"/>
 
 ## Quickstarts
 
@@ -55,7 +57,7 @@ volumes:
 <img src="./images/webui.png" width="80%"/>
 
 
-##### 4. 如果管理註冊帳號 [Option]
+##### 4. [Option] 如何管理註冊帳號
 
 畫面右上角人物頭像點下去:
 
