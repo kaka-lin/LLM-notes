@@ -35,32 +35,32 @@ volumes:
 
 #### 1. 登入畫面
 
-![](./images/webui_login.png)
+<img src="./images/webui_login.png" width="50%"/>
 
 > ##### 注意: 第一次啟動註冊的帳號及為管理員帳號，所以一定要先註冊！！！
 >
 
 #### 2. 註冊帳號
 
-![](./images/webui_signup.png)
+<img src="./images/webui_signup.png" width="50%"/>
 
 範例：
 
-![](./images/webui_signup_2.png)
+<img src="./images/webui_signup_2.png" width="50%"/>
 
 > 因為是啟動後第一次登入註冊，所以為管理員帳號
 
 ##### 3. 進入 WebUI，可以開始使用
 
-![](./images/webui.png)
+<img src="./images/webui.png" width="80%"/>
 
 
 ##### 4. 如果管理註冊帳號 [Option]
 
 畫面右上角人物頭像點下去:
 
-![](./images/webui_auth.png)
+<img src="./images/webui_auth.png" width="30%"/>
 
 然後點管理員控制台:
 
-![](./images/webui_auth_2.png)
+<img src="./images/webui_auth_2.png" width="200%"/>

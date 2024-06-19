@@ -4,7 +4,7 @@
 
 這其實是另一個基於 [Open WebUI (以前稱為 Ollama WebUI)](https://github.com/open-webui/open-webui/tree/main) 的專案: [valiantlynx/ollama-docker](https://github.com/valiantlynx/ollama-docker)，他是多了一個可以管理 LLM runners (包誇 Ollama) 和 Open WebUI 的頁面，而且也可以 debug 此 App container (藉由微軟的 [debugpy](https://github.com/microsoft/debugpy))，如下所示:
 
-![](./images/webui_advance.png)
+<img src="./images/webui_advance.png" width="80%"/>
 
 ## Quickstarts
 
