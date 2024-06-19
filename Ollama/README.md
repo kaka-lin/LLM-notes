@@ -4,6 +4,11 @@
 
 Ollama 是一個讓使用者可以在自己的設備上運行、創建和分享大型語言模型的開源軟體。
 
+##### Related Repo
+
+- [open-webui/open-webui](./webui/README.md)
+- [valiantlynx/ollama-docker](./webui-advance/README.md)
+
 ## Run With Docker
 
 ### CPU only

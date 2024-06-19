@@ -1,5 +1,7 @@
 # Ollama WebUI
 
+> ####  More information please see: [open-webui/open-webui ](https://github.com/open-webui/open-webui)
+
 [Open WebUI (以前稱為 Ollama WebUI)](https://github.com/open-webui/open-webui/tree/main) 就是一個可以架在自己的機器上面的 WebUI，它支援多種 LLM runners，包誇 Ollama 和 OpenAI-compatible APIs
 
 ## Quickstarts
