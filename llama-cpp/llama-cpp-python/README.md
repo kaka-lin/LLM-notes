@@ -24,7 +24,7 @@
 To install the package, run:
 
 ```sh
-$ pip install llama-cpp-python
+pip install llama-cpp-python
 ```
 This will also build llama.cpp from source and install it alongside this python package.
 
@@ -35,36 +35,37 @@ Detailed `MacOS Metal GPU` install documentation is available at [docs/install/m
 #### 1. 前置條件
 
 ```bash
-$ xcode-select --install
+xcode-select --install
 ```
 
 #### 2. 建議使用 Miniforge 安裝 Conda
 
 ```bash
-$ wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
-$ bash Miniforge3-MacOSX-arm64.sh
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
+bash Miniforge3-MacOSX-arm64.sh
 ```
 
 #### 3. 建立 conda 環境
 
 ```bash
-$ conda create -n llama python=3.10
-$ conda activate llama
+conda create -n llama python=3.10
+conda activate llama
 ```
 
 #### 4. 安裝 llama-cpp-python + Metal GPU 加速
 
+Before `llama.cpp` 0.2.65
 ```bash
-$ CMAKE_ARGS="-DLLAMA_METAL=on" FORCE_CMAKE=1 pip install --upgrade --force-reinstall --no-cache-dir llama-cpp-python
+CMAKE_ARGS="-DGGML_METAL=on -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_APPLE_SILICON_PROCESSOR=arm64" \
+FORCE_CMAKE=1 \
+pip install --upgrade --verbose --force-reinstall --no-cache-dir llama-cpp-python
 ```
-- FORCE_CMAKE=1：​強制使用 CMake 重新編譯，確保應用新的設定。​
 
-> If encount error:  `(mach-o file, but is an incompatible architecture (have 'x86_64', need 'arm64'))`
-
-Try installing with:
-
+After llama.cpp 0.2.65（推薦
 ```bash
-$ CMAKE_ARGS="-DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_APPLE_SILICON_PROCESSOR=arm64 -DGGML_METAL=on" pip install --upgrade --verbose --force-reinstall --no-cache-dir llama-cpp-python
+CMAKE_ARGS="-DLLAMA_METAL=on -DLLAMA_METAL_EMBED_LIBRARY=ON -DCMAKE_OSX_ARCHITECTURES=arm64" \
+FORCE_CMAKE=1 \
+pip install --upgrade --verbose --force-reinstall --no-cache-dir llama-cpp-python
 ```
 
 ## Example
