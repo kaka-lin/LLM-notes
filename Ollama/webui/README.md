@@ -11,12 +11,12 @@
 ### If Ollama is on your computer, use this command:
 
 ```sh
-$ docker run -d -p 8080:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
+docker run -d -p 8080:8080 --add-host=host.docker.internal:host-gateway -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
 ```
 ### Start Ollama and WebUI using Docker Compose:
 
 ```sh
-$ docker-compose up -d
+docker-compose up -d
 ```
 
 In [docker-compose.yml](./docker-compose.yaml):

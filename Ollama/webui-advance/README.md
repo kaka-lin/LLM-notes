@@ -11,20 +11,20 @@
 1. Clone the Docker Compose repository:
 
     ```sh
-    $ git clone https://github.com/valiantlynx/ollama-docker.git
+    git clone https://github.com/valiantlynx/ollama-docker.git
     ```
 
 2. Change to the project directory:
 
     ```sh
-    $ cd ollama-docker
+    cd ollama-docker
     ```
 
 3. Start Ollama and its dependencies using Docker Compose:
 
 
    ```sh
-   $ docker-compose up -d
+   docker-compose up -d
    ```
 
 啟動後，我們可以打開 http://0.0.0.0:8000，然後即可連至 `Open WebUI (Ollama WebUI)`。

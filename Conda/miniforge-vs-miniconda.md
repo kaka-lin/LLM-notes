@@ -20,16 +20,16 @@
 ## 安裝步驟
 
 ```bash
-$ wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
-$ bash Miniforge3-MacOSX-arm64.sh
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-MacOSX-arm64.sh
+bash Miniforge3-MacOSX-arm64.sh
 # or bash Miniforge3-MacOSX-arm64.sh -b -p <YOU WANTS PATH>
 ```
 
 ## 初始化與切換
 
 ```bash
-$ conda init zsh
-$ source ~/.zshrc
+conda init zsh
+source ~/.zshrc
 ```
 
 ## 查看架構是否正確
