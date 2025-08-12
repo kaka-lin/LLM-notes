@@ -58,5 +58,5 @@ trtllm-serve "TinyLlama/TinyLlama-1.1B-Chat-v1.0" --host 0.0.0.0 --port 8000
 2. 使用 Python OpenAI 函式庫
 
     ```bash
-    python3
+    python3 chat.py
     ```
