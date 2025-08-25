@@ -56,6 +56,12 @@ docker run --rm -it \
   nvcr.io/nvidia/tritonserver:25.07-trtllm-python-py3
 ```
 
+參數說明：
+
+- `-e PMIX_MCA_gds=hash`: 這項參數是為了解決容器內 OpenMPI 的權限與行程間通訊 (IPC) 問題。當遇到 `MPI_Init_thread` 相關錯誤時，設定此環境變數會讓 OpenMPI 的 PMIx 元件改用檔案式的雜湊儲存來取代共享記憶體 (GDS)，從而避開 `/dev/shm` 的權限問題。
+- **在容器內以 root 執行 `mpirun`**: 如果您需要在容器內以 `root` 使用者身份執行 `mpirun`（例如，在某些腳本中），Open MPI 預設是不允許的。您需要明確地加上 `--allow-run-as-root` 參數，或是設定環境變數 `OMPI_ALLOW_RUN_AS_ROOT=1` 和 `OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1` 來啟用此權限。
+
+
 ## Step 5: 建立 TensorRT-LLM 引擎
 
 Llava1.5 模型需建立兩種引擎：
@@ -180,16 +186,107 @@ python3 ${FILL_TEMPLATE_SCRIPT} \
 
 準備好模型儲存庫後，我們就可以啟動 Triton 推理伺服器了。
 
+### Step 8.1: 設定環境變數，並啟動 Triton 伺服器
+
+首先，設定必要的環境變數，並執行官方提供的啟動腳本。
+
 ```bash
-# 啟動 Triton 伺服器
+# 設定環境變數
+# TRT_ENGINE_LOCATION 指的是「視覺編碼器（vision）那顆 TensorRT 引擎」的檔案路徑
 export TRT_ENGINE_LOCATION="/engines/llava1.5/vision/model.engine"
 export HF_LOCATION="/llava-1.5-7b-hf"
+
+# 執行啟動腳本
+# --world_size=1: 指定使用單一 GPU
+# --model_repo: 指定 Triton Model Repository 的路徑
 python3 /app/scripts/launch_triton_server.py \
   --world_size=1 \
   --model_repo=/tutorials/Popular_Models_Guide/Llava1.5/model_repository
 ```
 
-You should expect the following response:
+執行此命令後，伺服器很可能會因為版本不同缺少參數而啟動失敗。請觀察終端機的錯誤訊息，並參考下面的步驟來逐一修復設定檔。
+
+### Step 8.2: 修改 `config.pbtxt` 以符合新版後端要求
+
+接下來的幾個子步驟，都是為了解決啟動失敗的問題。您需要手動編輯位於 `/tutorials/Popular_Models_Guide/Llava1.5/model_repository/` 中的 `tensorrt_llm/config.pbtxt` 及 `llava-1.5/config.txt` 的檔案，在 `parameters` 區塊中加入對應的設定。
+
+#### 8.2.1: 新增 `tokenizer_dir`
+
+- **問題**: TensorRT-LLM 後端需要明確知道 Tokenizer 的路徑才能將模型輸出的 ID 轉換回文字 (detokenize)，但教學範本的設定檔中缺少此項。
+- **解決方案**: 在 `tensorrt_llm/config.pbtxt` 中加入 `tokenizer_dir` 參數，並將其指向 Hugging Face 模型的目錄。
+
+    ```pbtxt
+    parameters: {
+      key: "tokenizer_dir"
+        value: {
+          string_value: "/llava-1.5-7b-hf"
+        }
+    }
+    ```
+
+#### 8.2.2: 新增 `xgrammar` 相關參數
+
+- **問題**: 25.05 版之後的 TensorRT-LLM 後端導入了 `XGrammar` 功能（用於限制生成文法），即使不使用，引擎在初始化時也會檢查相關參數，缺少就會報錯。
+- **解決方案**: 在 `tensorrt_llm/config.pbtxt` 中補上這兩個參數，並給予空字串值來表示關閉此功能。
+
+    ```pbtxt
+    parameters: {
+      key: "xgrammar_tokenizer_info_path"
+        value: {
+          string_value: ""
+        }
+    }
+    parameters: {
+      key: "xgrammar_tokenizer_merge_path"
+        value: {
+          string_value: ""
+        }
+    }
+    ```
+
+#### 8.2.3: 新增 `guided_decoding_backend`
+
+- **問題**: 新版本的後端強制要求設定 `guided_decoding_backend` 參數，舊的設定檔沒有這個參數，導致載入失敗。
+- **解決方案**: 在 `tensorrt_llm/config.pbtxt` 中新增此參數並設為 `"none"`，表示不使用 guided decoding 功能，以符合 LLaVA 教學範本的原始設定。
+
+    ```pbtxt
+    parameters: {
+      key: "guided_decoding_backend"
+        value: {
+          string_value: "none"
+        }
+    }
+    ```
+
+#### 8.2.4: 關閉 `enable_kv_cache_reuse`
+
+- **問題**: 新版後端預設可能開啟了 KV cache reuse 功能以提升效能，但此功能要求請求中必須包含 `prompt_table_extra_ids` 欄位。教學範本的 Python 客戶端腳本沒有產生這個欄位，導致請求驗證失敗。
+- **解決方案**: 為了讓教學範本能順利執行，最直接的方法是在 `tensorrt_llm/config.pbtxt` 中明確地關閉此功能。
+
+    ```pbtxt
+    parameters: {
+      key: "enable_kv_cache_reuse"
+        value: {
+          string_value: "false"
+        }
+    }
+    ```
+    > **注意**: 若未來有效能需求，想重新開啟此功能，則不能使用教學中的簡易版 Python 腳本，而需要修改客戶端程式碼或改用更完整的 `ensemble` 流程。
+
+#### 8.2.5: 關閉 `decoupled` 模式以支援 HTTP/Curl
+
+- **問題**: 當使用 `curl` 或透過 HTTP 發送請求時，可能會遇到 `HTTP end point doesn't support models with decoupled transaction policy` 的錯誤。這是因為 `llava-1.5` Python 後端模型的 `config.pbtxt` 預設啟用了 `decoupled` 模式，但 HTTP 端點不支援此模式。
+- **解決方案**: 如果您需要使用 `curl` 或 HTTP 客戶端進行測試，需要手動關閉 `decoupled` 模式。請編輯 `llava-1.5/config.pbtxt` 檔案，修改或加入以下設定：
+
+    ```pbtxt
+    model_transaction_policy {
+        decoupled: false
+    }
+    ```
+
+### Step 8.3: 確認伺服器成功啟動
+
+在修改完 `config.pbtxt` 後，請重新執行 Step 8.1 的啟動命令。重複此過程，直到所有必要的參數都已補全。當您在終端機看到以下訊息時，代表 Triton 伺服器已成功啟動並準備好接收推論請求：
 
 ```bash
 ...
@@ -198,7 +295,7 @@ I0825 09:05:40.722228 6320 http_server.cc:4789] "Started HTTPService at 0.0.0.0:
 I0825 09:05:40.798049 6320 http_server.cc:358] "Started Metrics Service at 0.0.0.0:8002"
 ```
 
-To stop Triton Server inside the container, run:
+若要停止容器內的 Triton Server，可以執行：
 
 ```bash
 pkill tritonserver
