@@ -17,3 +17,7 @@ __pycache__
 
 # jupyter notebook
 .ipynb_checkpoints
+
+
+# config
+.env
