@@ -10,8 +10,8 @@ async def main():
         print("警告：.env 檔案不存在或解析失敗，請確認它位於專案根目錄。")
 
     input_text = "Hello? Gemini are you there?"
-    gemini_agent = GeminiAgent(is_live=True, is_audio=True)
-    await gemini_agent.process(input_text)
+    gemini_agent = GeminiAgent(is_live=True)
+    await gemini_agent.process(input_text, response_format="audio")
 
 
 if __name__ == "__main__":
