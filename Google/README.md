@@ -13,5 +13,5 @@ pip3 install google-genai
 ## Run
 
 ```bash
-python3 chat.py
+python3 main.py
 ```
