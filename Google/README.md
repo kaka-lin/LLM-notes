@@ -15,3 +15,7 @@ pip3 install google-genai
 ```bash
 python3 main.py
 ```
+
+## Note
+
+For more information on ASR usage, please see [here](https://github.com/kaka-lin/ASR-notes/tree/main/google).
