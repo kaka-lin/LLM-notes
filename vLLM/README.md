@@ -128,3 +128,7 @@ vllm serve openai/gpt-oss-20b
 
     如果你有任何問題或需要協助，隨時告訴我！
     ```
+
+### 4. 更多模型範例
+
+如果您想了解如何使用 vLLM 運行其他特定模型（例如：DeepSeek, Gemma），請參考 [`Recipes/`](./Recipes/) 資料夾中對應的社群貢獻指南。
