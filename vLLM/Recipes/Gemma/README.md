@@ -20,19 +20,62 @@ Run the following command to start the Gemma model with vLLM:
 
 ```bash
 docker run --rm \
-    --gpus device=0 \
-    -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-    -p 8000:8000 \
-    -v ~/.cache/huggingface:/root/.cache/huggingface \
-    -e HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN} \
+    --gpus all \
     --ipc=host \
+    -p 8000:8000 \
+    -e PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
+    -e HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN} \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
     vllm/vllm-openai:latest \
     --model google/gemma-3-4b-it \
-    --enable-multimodal
+    --dtype bfloat16 \
+    --gpu-memory-utilization 0.9 \
+    --max-model-len 8192
 ```
-- 「**PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True**」：smoother memory allocation on CUDA
-- 「**--ipc=host**」：larger shared memory (helpful for big models)
-- 「**--enable-multimodal**」: enables multimodal capabilities for the model
+
+- **`PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True*`**：Optimize CUDA memory allocation to prevent fragmentation.
+- **`--ipc=host`**：larger shared memory (helpful for big models)
+- **`--dtype bfloat16`**: Sets the data type to `bfloat16` for better performance on modern GPUs.
+- **`--gpu-memory-utilization 0.9`**: Allow vLLM to use up to 90% of the GPU memory.
+- **`--max-model-len 8192`**: Set the maximum context length for the model.
+
+### 2. [RedHatAI/gemma-3-12b-it-quantized.w8a8](https://huggingface.co/RedHatAI/gemma-3-12b-it-quantized.w8a8)
+
+```bash
+docker run --rm \
+    --gpus all \
+    --ipc=host \
+    -p 8000:8000 \
+    -e HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN} \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    vllm/vllm-openai:latest \
+    --model RedHatAI/gemma-3-12b-it-quantized.w8a8 \
+    --dtype auto \
+    --gpu-memory-utilization 0.9 \
+    --max-model-len 8192 \
+    --served-model-name gemma3-12b-it-w8a8
+```
+
+- **`--dtype auto`**: Allow vLLM to automatically detect the appropriate data type for the quantized model.
+
+### 3. [RedHatAI/gemma-3-27b-it-quantized.w4a16](https://huggingface.co/RedHatAI/gemma-3-27b-it-quantized.w4a16)
+
+```bash
+docker run --rm \
+    --gpus all \
+    --ipc=host \
+    -p 8000:8000 \
+    -e HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN} \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    vllm/vllm-openai:latest \
+    --model RedHatAI/gemma-3-27b-it-quantized.w4a16 \
+    --dtype auto \
+    --gpu-memory-utilization 0.9 \
+    --max-model-len 8192 \
+    --served-model-name gemma3-27b-it-w4a16
+```
+
+- **`--dtype auto`**: Allow vLLM to automatically detect the appropriate data type for the quantized model.
 
 ## Example of Usage
 
@@ -73,4 +116,3 @@ curl http://localhost:8000/v1/chat/completions \
         "max_tokens": 1024,
         "temperature": 0
     }'
-```
