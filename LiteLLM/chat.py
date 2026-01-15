@@ -2,6 +2,7 @@ import warnings
 
 from litellm import completion
 
+from response_handlers import handle_non_streaming_response, handle_streaming_response
 
 warnings.filterwarnings(
     "ignore",
@@ -11,25 +12,34 @@ warnings.filterwarnings(
 )
 
 
-if __name__ == "__main__":
-    # 設定環境變數後，呼叫任意支援的模型
-
-    # 1. 非串流回應
+def chat_once(stream: bool = False):
     response = completion(
         model="gemini/gemini-2.5-flash",
         messages=[
             {"role": "system", "content": "You are a helpful assistant"},
             {"role": "user", "content": "Explain LiteLLM in one sentence"}
         ],
+        stream=stream,
     )
-    print(response.choices[0].message["content"])
 
-    # 2. 串流回應
-    # for chunk in completion(
-    #     model="gemini/gemini-2.5-flash",
-    #     messages=[{"role": "user", "content": "Summarize LiteLLM briefly"}],
-    #     stream=True,
-    # ):
-    #     delta = chunk["choices"][0]["delta"]
-    #     if "content" in delta:
-    #         print(delta["content"], end="")
+    if not stream and (response is None or len(response["choices"]) == 0):
+        raise Exception("API Error: No choices in response")
+
+    if stream:
+        content, finish_reason = handle_streaming_response(response)
+    else:
+        content = handle_non_streaming_response(response)
+
+    print(content)
+
+
+def main():
+    print("=== 非串流回應 ===")
+    chat_once(stream=False)
+
+    print("\n=== 串流回應 ===")
+    chat_once(stream=True)
+
+
+if __name__ == "__main__":
+    main()
