@@ -1,0 +1,20 @@
+[demo_prompt]
+system="""You are a demo assistant.
+
+Hello {{ name }}.
+
+{%- if user_input %}
+
+Recent User context:
+-----
+{{ user_input }}
+-----
+{%- else %}
+
+(No user input provided.)
+{%- endif %}
+"""
+
+user="""Question from user:
+{{ question }}
+"""
