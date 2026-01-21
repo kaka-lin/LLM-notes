@@ -6,6 +6,12 @@
 
 ## Example
 
+### 1. 外部 Chat Memory
+
+Please check here: [LiteLLM Chat Memory](../LiteLLM/chat-memory/README.md)
+
+### 2. Conditional Prompt Templating
+
 This repo uses **Jinja2** templates inside TOML prompt files (see [template.toml](./template.toml)).
 The basic idea is:
 
