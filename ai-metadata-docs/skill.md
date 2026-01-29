@@ -14,7 +14,7 @@ AI 會把 skill 當成：
 |------|-----------------|------------------|
 | **VSCode + Copilot** | `.github/skills/<skill-name>/` | `~/.copilot/skills/` |
 | **Claude Code** | `.claude/skills/` | `~/.claude/skills/` |
-| **Antigravity** | `.agent/skills/` | `~/.gemini/antigravity/global_skills/` |
+| **Antigravity** | `.agent/skills/` | `~/.gemini/antigravity/skills/` |
 
 ## SKILL.md 規範
 
