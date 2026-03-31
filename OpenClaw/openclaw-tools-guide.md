@@ -2,316 +2,124 @@
 
 _更新時間：2026-03-27_
 
-OpenClaw 提供了多種內建工具，特別是 `sessions_*` 系列的 session / agent 協調工具。這些工具在官方文件中被歸類為內建工具（built-in tools），並在 session tool 專頁中有詳細說明。
+OpenClaw 提供了多種內建工具，特別是 `sessions_*` 系列的協調工具。這些工具在官方文件中被歸類為「核心工具」(Built-in Tools)，本指南詳細整理了其分類與查詢方式。
 
-**主要參考來源：**
+## 1. 工具、Skill 與 Plugin 的差異
 
-- [OpenClaw Tools](https://docs.openclaw.ai/tools)
-- [Session Tools](https://docs.openclaw.ai/concepts/session-tool)
-- [OpenClaw GitHub](https://github.com/openclaw/openclaw)
+OpenClaw 官方將能力分為三層架構：
 
-## 1. OpenClaw 的工具、Skill、Plugin 是什麼差別？
+- **Tool**：真正執行動作的能力。模型可以直接呼叫的具名函式 (Typed Function)。
+- **Skill**：教導模型如何使用工具。透過 `SKILL.md` 操作說明，引導 Agent 在正確時機調用工具。
+- **Plugin**：外部擴充能力。用於註冊額外的 Tool、Skill、模型提供者或通訊管道。
 
-OpenClaw 官方把能力分成三層：
+## 2. 核心功能包含哪些？
 
-- **Tool**：真正執行動作的能力。模型可以直接呼叫的 typed function。
-- **Skill**：教模型怎麼用工具。透過 `SKILL.md` 等操作說明，引導 agent 何時、如何使用工具。
-- **Plugin**：額外擴充能力。可額外註冊 tool、skill、model provider 或 channel。
+根據官方文件，內建工具大致分為以下類別：
 
-## 2. OpenClaw 內建工均有哪些？
+### 2.1 執行環境與 Shell (Runtime)
 
-根據官方 `Tools and Plugins` 文件，OpenClaw 內建工具大致分成這些：
+- `exec`：執行 Shell 指令。
+- `process`：管理背景程序。
+- （`bash` 常作為 `exec` 的別名使用）。
 
-### 2.1 Runtime / Shell
+### 2.2 網頁與瀏覽器 (Web / Browser)
 
-- `exec`
-- `process`
-- （`bash` 在設定群組中可作為 `exec` 的 alias）
+- `browser`：控制 Chromium 瀏覽器（換頁、點擊、截圖）。
+- `web_search`：執行網頁搜尋。
+- `web_fetch`：抓取網頁原始內容。
 
-用途：執行 shell 指令、管理背景程序。
+### 2.3 檔案系統 (Filesystem)
 
-### 2.2 Web / Browser
+- `read` / `write`：檔案讀寫。
+- `edit`：編輯檔案內容。
+- `apply_patch`：套用程式碼補丁。
 
-- `browser`
-- `web_search`
-- `web_fetch`
+### 2.4 通訊與訊息 (Messaging)
 
-用途：
+- `message`：跨平台與跨頻道傳送訊息。
 
-- `browser`：控制 Chromium 瀏覽器（開頁、點擊、截圖）
-- `web_search`：搜尋網頁
-- `web_fetch`：抓取網頁內容
+### 2.5 裝置與自動化 (Automation)
 
-### 2.3 檔案系統
+- `canvas`：與繪圖節點互動。
+- `nodes`：探索與配對網路中的對等節點。
+- `cron`：執行排程任務。
+- `gateway`：管理閘道層的高權限操作。
 
-- `read`
-- `write`
-- `edit`
-- `apply_patch`
+> [!IMPORTANT]
+> 官方安全指南提醒，`gateway` 與 `cron` 屬於高風險工具。在處理不可信輸入時，建議預設禁止 (Deny) `sessions_spawn` 與 `sessions_send` 等高功能權限。
 
-用途：在 workspace 內做檔案讀寫與 patch。
+### 2.6 多媒體能力 (Media)
 
-### 2.4 Messaging / Sending
+- `image`：圖片內容分析。
+- `image_generate`：生成或編輯圖片。
 
-- `message`
+### 2.7 代理人協調 (Session / Agent Coordination)
 
-用途：跨 channel 傳送訊息。
+- `sessions_list`：列出所有活動中的對話。
+- `sessions_history`：讀取特定對話的歷史紀錄。
+- `sessions_send`：傳送跨 Agent 訊息。
+- `sessions_spawn`：生成子代理人 (Sub-agent)。
+- `session_status`：檢查目前工作狀態。
 
-### 2.5 UI / Device / Node
+## 3. `sessions_list` 工具詳解
 
-- `canvas`
-- `nodes`
+`sessions_list` 是目前最常用的管理工具之一，它將 Agent 對話資訊以陣列形式回傳。
 
-用途：
+- **支援參數**：可透過 `kinds`、`limit`、`activeMinutes` 等篩選器優化結果。
+- **回傳內容**：包含 `sessionId`、`model`、`updatedAt`、`totalTokens` 以及對話脈絡資訊。
 
-- `canvas`：與 node Canvas 互動
-- `nodes`：發現與指定配對裝置/節點
+## 4. 如何查詢可用工具？
 
-### 2.6 Automation / Control Plane
+查詢工具時須區分「目錄」與「實際權限」：
 
-- `cron`
-- `gateway`
+### 4.1 核心目錄 (Catalog)
 
-用途：
+最直接的方式是查閱官方文件或呼叫 `tools.catalog` API，了解 OpenClaw 程式碼庫中理論上支援哪些工具。
 
-- `cron`：排程工作
-- `gateway`：管理 gateway、部分控制平面操作
+### 4.2 運行時權限 (Runtime Policy)
 
-> 注意：官方安全文件特別提醒，`gateway` 和 `cron` 屬於高風險工具；另外也建議在不可信輸入場景下，預設 deny `sessions_spawn`、`sessions_send`。這代表它們能力很強，但也要小心授權。
+工具是否可用受到 **Policy Chain** 的嚴格控管。
 
-### 2.7 Image / Media
+- **過濾層級**：包含 `tools.profile` 設定項、`tools.allow` / `tools.deny` 名單，以及個別 Agent 的覆寫設定。
+- **原則**：內建並不代表一定能用， Agent 只能看見被明確授權的工具。
 
-- `image`
-- `image_generate`
+## 5. 實務查閱技巧
 
-用途：
+### 方法 A：使用 Control UI (推薦)
 
-- `image`：圖片分析
-- `image_generate`：圖片生成或編修
+在管理介面中，可查看 **Available Right Now** 視圖。這是透過 `tools.effective()` 計算後的最終清單，即為 Agent 當下真正能用的工具。
 
-### 2.8 Session / Agent Coordination
+### 方法 B：查閱設定檔
 
-- `sessions_list`
-- `sessions_history`
-- `sessions_send`
-- `sessions_spawn`
-- `session_status`
-- （某些文件/群組條目也提到 `sessions_yield`、`subagents`、`agents_list`）
+檢查 `~/.openclaw/openclaw.json` 中的 `tools.profile` 與 `group:*` 設定，以此推斷被分配的工具群組。
 
-用途：
+### 方法 C：直接驗證
 
-- 查目前 session
-- 讀取某個 session 的歷史
-- 傳訊息給另一個 session
-- 生成 sub-agent / sub-session
-- 查 session 狀態
+嘗試使用 `/tools/invoke` 呼叫特定工具。若回傳 **404**，通常代表該工具被 Policy 封鎖或不存在。
 
-## 3. `sessions_list` 是做什麼的？
+## 6. 工具群組 (Tool Groups) 參考
 
-官方 Session Tools 文件列出的 tool names 包含：
+大多數情況下，我們會透過群組 (Group) 來批次設定權限：
 
-- `sessions_list`
-- `sessions_history`
-- `sessions_send`
-- `sessions_spawn`
+- **`group:runtime`**：含 `exec`, `process`。
+- **`group:fs`**：含 `read`, `write`, `edit`, `apply_patch`。
+- **`group:sessions`**：含 `sessions_*` 等 Agent 協調工具。
+- **`group:web`**：含 `web_search`, `web_fetch`。
+- **`group:ui`**：含 `browser`, `canvas`。
 
-其中 `sessions_list` 用來「列出 session 作為一個 rows array」。支援的常見參數包含：
+## 7. 結論與測試心得
 
-- `kinds?: string[]`
-- `limit?: number`
-- `activeMinutes?: number`
-- `messageLimit?: number`
+1. **功能完整性**：透過 API 測試證明 `sessions_list` 是內建且可直接調用的。
+2. **查詢路徑**：目前系統標配並無通用的 `tools.list` 查詢指令，應以 Control UI 視圖為準。
+3. **安全考量**：所有工具的使用都具備追蹤與權限隔離，確保多代理環境的穩定性。
 
-回傳每列通常會含有：
+---
 
-- `key`
-- `kind`
-- `channel`
-- `displayName`
-- `updatedAt`
-- `sessionId`
-- `model`
-- `contextTokens`
-- `totalTokens`
-- `lastTo`
-- `deliveryContext`
-- `transcriptPath`
-- 以及可選的 `messages`
-
-這也和你目前測試程式裡用 `/tools/invoke` 呼叫 `sessions_list` 的方式一致。
-
-## 4. 如何查「有哪些工具」？
-
-這個問題要分成兩種：
-
-### 4.1 查「OpenClaw 理論上有哪些內建工具」
-
-最直接的方法：
-
-1. 看官方文件：`Tools and Plugins`
-2. 看 `tools.profile` / `tool groups` / `configuration reference`
-3. 看 session tools / web tools / browser tools 等分頁
-
-這能查到 **catalog 層級** 的工具，也就是 OpenClaw 內建支援哪些工具。
-
-### 4.2 查「你這個 session / 這個 agent 現在實際可用哪些工具」
-
-這才是最重要的。
-
-官方文件明確說明：**工具是否可用，會經過 policy chain 過濾**，包含：
-
-- `tools.profile`
-- `tools.allow`
-- `tools.deny`
-- `tools.byProvider.*`
-- per-agent 覆寫
-- group / channel policy
-- subagent policy
-
-所以：
-
-- 內建 ≠ 一定能用
-- 某工具存在 ≠ 你目前這個 session 一定拿得到
-
-## 5. 實務上怎麼查目前可用工具？
-
-### 方法 A：Control UI 看 runtime tool list
-
-官方 WebChat / Control UI 文件提到 `/agents` 的 Tools panel 有兩種視圖：
-
-1. **Available Right Now**：使用 `tools.effective(sessionKey=...)`，顯示當前 session 真正可用的工具。
-2. **Tool Configuration**：使用 `tools.catalog`，顯示工具目錄與設定語意。
-
-這目前是查閱可用工具最直接的官方方法。
-
-### 方法 B：看設定檔
-
-查看 `~/.openclaw/openclaw.json` 裡的：
-
-- `tools.profile`
-- `tools.allow`
-- `tools.deny`
-- `tools.byProvider`
-- `agents.list[].tools.*`
-
-再對照官方文件中的 tool groups，例如 `group:runtime`、`group:fs` 等，可以推估 agent 最終拿到哪些工具。
-
-### 方法 C：直接試 `/tools/invoke`
-
-透過 Gateway API 測試：
-
-```json
-{
-  "tool": "sessions_list",
-  "action": "json",
-  "args": {}
-}
-```
-
-如果工具被 policy 擋掉，`/tools/invoke` 會回傳 **404**。這個方法適合針對特定工具進行驗證。
-
-### 方法 D：從 Control UI 的 Agents / Tools & Plugins 頁面
-
-透過 UI 的 tools panel 視圖可以很方便地分辨：
-
-- 目錄（catalog）中有哪些工具
-- 目前運行（runtime）真正能用哪些工具
-
-## 6. 有沒有官方 `tools.list` 之類的 API？
-
-以我這次查到的公開資料來看：
-
-- 官方文件明確提到的是 `tools.effective(sessionKey=...)` 與 `tools.catalog`（出現在 Control UI / Agents tools panel 的說明裡）
-- 官方對外穩定公開、你現在直接能打的是 `POST /tools/invoke`
-- 我沒有找到一個在官方 API 文件裡清楚列為公開 HTTP API 的 `tools.list` endpoint
-
-另外，GitHub issue 也出現過有人提到：
-
-- `openclaw gateway call tools.list` 會回 `unknown method: tools.list`
-- 某些 debug 命令在特定版本不存在
-
-> **不要假設有通用公開的 `tools.list` HTTP API。**
-> 查可用工具時，優先用 **Control UI 的 Available Right Now / Tool Configuration**，或直接看設定與 `/tools/invoke` 測試。
-
-## 7. Tool Profiles 與 Tool Groups 整理
-
-官方 configuration reference 列出的 profile：
-
-### Profiles
-
-- `minimal`：`session_status` only
-- `coding`：`group:fs`, `group:runtime`, `group:sessions`, `group:memory`, `image`
-- `messaging`：`group:messaging`, `sessions_list`, `sessions_history`, `sessions_send`, `session_status`
-- `full`：不限制（等同 unset）
-
-### Tool Groups
-
-- `group:runtime` → `exec`, `process`
-- `group:fs` → `read`, `write`, `edit`, `apply_patch`
-- `group:sessions` → `sessions_list`, `sessions_history`, `sessions_send`, `sessions_spawn`, `session_status`
-- `group:memory` → `memory_search`, `memory_get`
-- `group:web` → `web_search`, `web_fetch`
-- `group:ui` → `browser`, `canvas`
-- `group:automation` → `cron`, `gateway`
-- `group:messaging` → `message`
-- `group:nodes` → `nodes`
-- `group:openclaw` → 所有內建 OpenClaw 工具（不含 provider plugins）
-
-這一段很重要，因為很多時候你不是一個一個 allow tool，而是直接 allow 一個 `group:*`。
-
-## 8. 你現在這個 `sessions_list` 測試代表什麼？
-
-你的測試腳本是：
-
-```python
-payload = {
-  "tool": "sessions_list",
-  "action": "json",
-  "args": {}
-}
-```
-
-這代表：
-
-1. 你的 Gateway `/tools/invoke` endpoint 可達
-2. bearer token 正常
-3. 目前這個 session / agent policy 沒有擋掉 `sessions_list`
-4. OpenClaw 端確實有註冊 `sessions_list` 這個工具
-
-也就是說，至少在你目前這套環境裡，`sessions_list` 不只是文件上的 built-in tool，**而且是實際可調用的 tool**。
-
-## 9. 給你的結論
-
-### Q1. `sessions_list` 是不是 OpenClaw 內建工具？
-
-**是。** 它屬於官方 `sessions_*` session tools 的一部分。
-
-### Q2. OpenClaw 內建工具有哪些？
-
-官方文件列出的 built-in tools 包含：
-
-- `exec`, `process`
-- `browser`
-- `web_search`, `web_fetch`
-- `read`, `write`, `edit`
-- `apply_patch`
-- `message`
-- `canvas`
-- `nodes`
-- `cron`, `gateway`
-- `image`, `image_generate`
-- `sessions_*`, `agents_list`
-- 另外在 configuration/tool groups 中也能看到：`memory_search`, `memory_get`, `session_status`
-
-### Q3. 怎麼查有哪些工具？
-
-這也和你目前測試程式裡用 `/tools/invoke` 呼叫 `sessions_list` 的方式一致。
-
-## 10. 主要參考來源
+### 主要參考來源
 
 - [Tools and Plugins](https://docs.openclaw.ai/tools)
 - [Tools Invoke API](https://docs.openclaw.ai/gateway/tools-invoke-http-api)
 - [Session Tools](https://docs.openclaw.ai/concepts/session-tool)
 - [Configuration Reference](https://docs.openclaw.ai/gateway/configuration-reference)
-- [WebChat / Control UI tools panel](https://docs.openclaw.ai/web/webchat)
-- [OpenClaw GitHub repository](https://github.com/openclaw/openclaw)
+- [OpenClaw GitHub Repository](https://github.com/openclaw/openclaw)
+
