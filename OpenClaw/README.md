@@ -38,7 +38,7 @@ openclaw onboard --install-daemon
 
 OpenClaw 核心內建強大的多代理 (Multi-agent) 路由能力。您可以透過建立 `SOUL.md` 檔案來定義 AI 的「人格」與主要任務，並直接原生打造專屬的自動化工作流（例如浪live自動引流腳本）。
 
-- **詳細設定與範例**：請參閱內建的 [代理人設計細節 (Built-in Agents)](./built-in-agents.md)。
+- **詳細設定與範例**：請參閱內建的 [代理人設計細節 (Built-in Agents)](./guides/built-in-agents.md)。
 
 ## 6. 架構系統
 
@@ -52,15 +52,49 @@ OpenClaw 的架構主要由四個層次組成：
 
 4. **Skills & Execution (技能與執行層)**：負責採取實際行動（例如：執行程式碼、網頁搜尋等）。
 
-## 7. 核心功能與技術細節 (Core Features & Technical Details)
+## 7. 文件導覽
 
-- [OpenClaw Tools 內建工具整理](./openclaw-tools-guide.md)：詳細介紹內建工具分類 (Runtime, Browser, Web, FS, Sessions 等) 與其查詢方式。
+### 7.1 Concepts
 
-- [OpenClaw APIs 呼叫指南](./openclaw-apis.md)：提供 OpenAI 相容 API、原生 OpenResponses API 與 Tools Invoke API 的完整規範。
+核心觀念與系統行為，適合先建立心智模型。
 
-- [Sandbox 隔離架構說明](./sandbox-architecture.md)：分析 OpenClaw 如何透過 Sandbox 與 Docker 進行執行環境隔離。
+- [會話隔離與重置機制 (Session Management)](./concepts/session-management.md)：Session Key 隔離、`/new` 與 `/reset` 指令、記憶系統（MEMORY.md、Daily Notes、Dreaming）、各平台最佳實踐。
 
-- [Docker 網路綁定與部署](./docker-network-binding.md)：關於 Docker 網路通訊、容器連結與對外開放連接埠的詳細說明。
+- [Heartbeat 心跳機制](https://github.com/kaka-lin/openclaw-server/tree/main/docs/guides/heartbeat-config.md)：Gateway 定時喚醒的執行與投遞分離設計、Multi-Agent 繼承規則、`HEARTBEAT.md` 用法與省錢技巧。
+
+- [自動化與 Cron 排程](https://github.com/kaka-lin/openclaw-server/tree/main/docs/guides/automation-config.md)：Cron Job 設定方式（聊天 / CLI）、排程類型、與 Heartbeat 的選擇判斷。
+
+- [Skills 與 ClawHub](./concepts/skills-and-clawhub.md)：技能系統的建立、管理與市集運作。
+
+### 7.2 Guides
+
+操作指南與日常查閱，適合需要「怎麼做」時使用。
+
+- [代理人設計細節 (Built-in Agents)](./guides/built-in-agents.md)：SOUL.md、agent 目錄架構與多代理協作。
+
+- [斜線指令 (Slash Commands) 指南](./guides/slash-commands-guide.md)：純文字指令與原生指令的差異、核心內建指令、權限認證機制。
+
+- [OpenClaw Tools 內建工具整理](./guides/openclaw-tools-guide.md)：詳細介紹內建工具分類 (Runtime, Browser, Web, FS, Sessions 等) 與其查詢方式。
+
+### 7.3 Reference
+
+規格型文件，適合實作整合或查 API 細節。
+
+- [OpenClaw APIs 呼叫指南](./reference/openclaw-apis.md)：提供 OpenAI 相容 API、原生 OpenResponses API 與 Tools Invoke API 的完整規範。
+
+### 7.4 Deployment
+
+部署、安全與網路設定。
+
+- [Sandbox 隔離架構說明](./deployment/sandbox-architecture.md)：分析 OpenClaw 如何透過 Sandbox 與 Docker 進行執行環境隔離。
+
+- [Docker 網路綁定與部署](./deployment/docker-network-binding.md)：關於 Docker 網路通訊、容器連結與對外開放連接埠的詳細說明。
+
+### 7.5 Best Practices
+
+開發經驗與設計心法。
+
+- [Skill 開發與設計心法](./best-practices/skill-development.md)：Skill prompt、安全邊界、metadata gating 與測試流程。
 
 ## 8. 生態系
 
@@ -83,4 +117,3 @@ OpenClaw 的架構主要由四個層次組成：
 - **避免直接曝露憑證**：請勿將 API Keys 等機密資訊直接寫在腳本中。
 
 - **NemoClaw**：NVIDIA 提供了一個名為 NemoClaw 的開源參考堆疊 (Reference Stack)，可以進一步提升執行 OpenClaw 時的安全性。
-
