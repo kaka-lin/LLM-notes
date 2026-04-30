@@ -82,4 +82,4 @@
 **相關參考：**
 
 - [詳細部署深度研究 (OpenClaw Server)](https://github.com/kaka-lin/openclaw-server/tree/main/docs/deployment/setup-deep-dive.md)
-- [OpenClaw 核心原理與架構筆記 (LLM-notes)](./README.md)
+- [OpenClaw 核心原理與架構筆記 (LLM-notes)](../README.md)
