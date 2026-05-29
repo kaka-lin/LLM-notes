@@ -21,3 +21,8 @@ __pycache__
 
 # config
 .env
+
+# databases
+*.db
+*.sqlite
+*.sqlite3
