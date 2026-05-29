@@ -1,0 +1,15 @@
+[project]
+name = "sdd-url-shortener-example"
+version = "0.1.0"
+description = "Minimal SDD example — URL shortener with traceable REQ/CON/DAT/AC."
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi",
+    "httpx",
+    "pytest",
+    "uvicorn[standard]",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
